@@ -58,7 +58,7 @@ You can now access the demo site on http://localhost:8000
 Useful links
 ------------
 
-Csv Upload, Book and Cancel Bokking
+Csv Upload, Book and Cancel Booking
 
 ```
 $ Upload members csv file: http://127.0.0.1:8000/members/upload
