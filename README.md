@@ -55,6 +55,18 @@ $ python3 manage.py runserver
 
 You can now access the demo site on http://localhost:8000
 
+Useful links
+------------
+
+Csv Upload, Book and Cancel Bokking
+
+```
+$ Upload members csv file: http://127.0.0.1:8000/members/upload
+$ Upload inventory csv file: http://127.0.0.1:8000/inventory/upload
+$ Create booking: http://127.0.0.1:8000/book/
+$ Delete booking: http://127.0.0.1:8000/book/cancel/<booking_id>
+```
+
 CSV Files
 ---------
 
