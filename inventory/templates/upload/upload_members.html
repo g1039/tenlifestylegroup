@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Members{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<h2>Upload CSV</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+{% else %}
+<div class="row">
+    <div class="col-lg-12 text-center">
+        <h1 class="mt-5">You are not logged in</h1>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
