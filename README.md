@@ -75,7 +75,7 @@ CSV Files
 Download CSV files:
 
 ```
-$ inventory/csv
-$ inventory/csv/members
-$ inventory/csv/inventory
+$ csv
+$ csv/members
+$ csv/inventory
 ```
