@@ -3,6 +3,8 @@ Ten Lifestyle Group
 
 Inventory Management Systen
 
+![Django CI](https://github.com/NtuDev/tenlifestylegroup/workflows/Django%20CI/badge.svg)
+
 
 Requirements:
 -------------
