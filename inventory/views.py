@@ -85,7 +85,7 @@ class BookingsViewSetList(APIView):
                 )
             else:
                 return Response(
-                    {"MAX BOOKINGS": "2"},
+                    {"Error": "You have reached the maximum number of bookings."},
                     status=status.HTTP_200_OK,
                     content_type='text/html'
                 )
