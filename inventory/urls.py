@@ -8,6 +8,7 @@ from inventory import views
 from inventory.models import Bookings
 from inventory.serializers import BookingsSerializer
 
+
 urlpatterns = [
     path("", views.home_view, name="home"),
     path(

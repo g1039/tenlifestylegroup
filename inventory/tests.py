@@ -5,7 +5,11 @@ from django.test import Client, TestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from inventory.models import Members, Inventory
+from rest_framework import status
+from rest_framework.test import APIClient
+
+from inventory.models import Bookings, Members, Inventory
+from inventory.serializers import BookingsSerializer
 
 
 class MembersCsvFileUploadTests(TestCase):
@@ -217,3 +221,125 @@ class InventoryCsvFileUploadTests(TestCase):
         os.remove(my_csv_file.name)
         os.remove(invalid_csv_file.name)
         os.remove(my_txt_file.name)
+
+
+BOOKING_URL = reverse('book')
+
+class BookingApiTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            'test@mail.com',
+            'testpass'
+        )
+
+        self.member_0 = Members.objects.create(
+            name='Foo',
+            surname='TDD',
+            booking_count=1,
+            date_joined='2021-01-12T16:11:58.644787Z'
+        )
+
+        self.member_1 = Members.objects.create(
+            name='Bob',
+            surname='py',
+            booking_count=0,
+            date_joined='2021-01-11T14:12:28.644787Z'
+        )
+
+        self.inventory_0 = Inventory.objects.create(
+            title='Japan',
+            description='Toyko',
+            remaining_count=3,
+            expiration_date='2021-01-11T14:12:28.644787Z'
+        )
+
+        self.inventory_1 = Inventory.objects.create(
+            title='Mzansi',
+            description='Fo Sho',
+            remaining_count=2,
+            expiration_date='2021-01-12T16:11:58.644787Z'
+        )
+
+        self.inventory_2 = Inventory.objects.create(
+            title='RSA',
+            description='CPT',
+            remaining_count=0,
+            expiration_date='2021-02-12T16:11:58.644787Z'
+        )
+
+        self.booking_3 = Bookings.objects.create(
+            booking_id='d7b8b05d1e38',
+            member=self.member_1,
+            inventory=self.inventory_2,
+            creation_date='2021-01-11T14:12:28.644787Z'
+        )
+
+        self.client.force_authenticate(self.user)
+
+
+    def test_retrieve_booking_list(self):
+
+        Bookings.objects.create(
+            booking_id='dab9bc908ff9',
+            member=self.member_0,
+            inventory=self.inventory_0,
+            creation_date='2021-01-12T16:11:58.644787Z'
+        )
+
+        Bookings.objects.create(
+            booking_id='1013b5cbc7e5',
+            member=self.member_1,
+            inventory=self.inventory_1,
+            creation_date='2021-01-11T14:12:28.644787Z'
+        )
+
+        res = self.client.get(BOOKING_URL)
+
+        bookings = Bookings.objects.all()
+        serializer = BookingsSerializer(bookings, many=True)
+
+        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(Bookings.objects.all().count(), 3)
+
+
+    def test_get_valid_single_booking(self):
+
+        BOOKING_DETAILS_URL = reverse(
+            'cancel', args=[self.booking_3.booking_id])
+
+        res = self.client.get(BOOKING_DETAILS_URL)
+        booking = Bookings.objects.get(booking_id=self.booking_3.booking_id)
+        serializer = BookingsSerializer(booking)
+        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        member = Members.objects.get(pk=self.member_1.pk)
+        self.assertEqual(len(member.booking_count), 1)
+
+        inventory = Inventory.objects.get(pk=self.inventory_2.pk)
+        self.assertEqual(len(inventory.remaining_count), 1)
+
+
+    def test_get_invalid_single_booking(self):
+
+        BOOKING_DETAILS_URL = reverse(
+            'cancel', args=['2w23dedfws'])
+        res = self.client.get(BOOKING_DETAILS_URL)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+
+    def test_valid_delete_booking(self):
+        BOOKING_DETAILS_URL = reverse(
+            'cancel', args=[self.booking_3.booking_id])
+        res = self.client.delete(BOOKING_DETAILS_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+
+    def test_invalid_delete_booking(self):
+        BOOKING_DETAILS_URL = reverse(
+            'cancel', args=['2w23dedfws'])
+        res = self.client.delete(BOOKING_DETAILS_URL)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
